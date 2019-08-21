@@ -1,0 +1,28 @@
+ext {
+    //false 組件模式
+    //true 集成模式
+    isModule = true
+
+    androidCfg = [
+            compileSdkVersion: 28,
+            minSdkVersion    : 23,
+            targetSdkVersion : 28,
+            versionCode      : 1,
+            versionName      : "1.0"
+    ]
+
+    appId = [
+            "app"    : "com.kakin.routerlearn",
+            "module1": "com.kakin.module1",
+            "module2": "com.kakin.module2"
+    ]
+
+
+    versions = [
+            supportLibrary: "28.0.0"
+    ]
+}
+
+def depends = [:]
+depends.appcompat_v7 = "com.android.support:appcompat-v7:${versions.supportLibrary}"
+ext.depends = depends

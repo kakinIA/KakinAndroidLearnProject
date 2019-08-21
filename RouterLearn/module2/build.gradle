@@ -1,0 +1,63 @@
+//通過isModule動態設置這塊module是作爲library還是application，即動態切換 集成/組件模式
+if (isModule) {
+    apply plugin: 'com.android.library'
+} else {
+    apply plugin: 'com.android.application'
+}
+
+android {
+    compileSdkVersion androidCfg.compileSdkVersion
+    defaultConfig {
+        minSdkVersion androidCfg.minSdkVersion
+        targetSdkVersion androidCfg.targetSdkVersion
+        versionCode androidCfg.versionCode
+        versionName androidCfg.versionName
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("boolean", "isModule", String.valueOf(isModule))
+
+        //組件模式下
+        if (!isModule) {
+            applicationId appId['module2']
+        }
+
+        //資源配置
+        sourceSets {
+            main {
+                //在組件模式/集成模式使用不同的manifest文件
+                if (!isModule) {
+                    java.srcDirs 'src/main/module/java', 'src/main/java'
+                    manifest.srcFile 'src/main/module/AndroidManifest.xml'
+                } else {
+                    manifest.srcFile 'src/main/AndroidManifest.xml'
+                }
+            }
+        }
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [moduleName: project.getName()]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation depends.appcompat_v7
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation project(':framework')
+    annotationProcessor project(':router_compiler')
+}
