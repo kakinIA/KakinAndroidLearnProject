@@ -167,7 +167,8 @@ public class SingleService implements IProvider {
 這種形式相當於在一個基礎模塊中聲明A模塊中能對外開放的功能的接口，然後在A模塊裏寫實現邏輯，通過模塊鏈接庫（ARouter）公開給其他模塊使用。仔細想想，這符合什麽設計模式？？像ARouter中直接路由Activity，是不是可以用接口中的某個方法的實現來代替？    
 雖然本人手頭上觀察了兩個比較大型且出名的項目，但仍未看出直接路由Activity會帶來什麽超出預想的積極影響，或許以後才可能看到路由Activity的優勢吧..
 
-###使用反射去進行模塊鏈接是否真的不提倡？   
+
+### 使用反射去進行模塊鏈接是否真的不提倡？   
 
 ARouter也用到路由。而且反射+緩存會帶來很多很多積極的影響，比如一個簡單的反射模塊鏈接框架可以容易地控制反射。假設
 ```
@@ -177,11 +178,11 @@ ModuleClassProvider.getInstance().inject(MyService.class).sayHello（）//裏面
 ```
 上述這個使用似乎在第一次使用時會比較消耗性能（ARouter也同樣有這個問題），但是我可以輕鬆定制這個inject邏輯在哪個綫程執行，比如說可以在初始化的某個時刻在分綫程中進行預加載。
 
-##參考   
+## 參考   
 
 [Arouter](https://github.com/alibaba/ARouter)
 [AndroidComponent](https://github.com/wustor/AndroidComponent)
 
-##其他   
+## 其他   
 
 [本項目](https://github.com/kakinIA/KakinAndroidLearnProject/tree/master/RouterLearn)
