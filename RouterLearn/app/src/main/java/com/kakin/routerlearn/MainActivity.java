@@ -15,6 +15,8 @@ import com.kakin.framework.router.iservice.Module2BService;
 import com.kakin.router_annotation.Route;
 import com.kakin.router_core.KRouter;
 
+import java.lang.reflect.Method;
+
 @Route(path = "this is MainActivity")
 public class MainActivity extends AppCompatActivity {
 
@@ -48,8 +50,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void module2BService(View view) {
+        long preTime = System.currentTimeMillis();
         Module2BService service = (Module2BService) KRouter.getInstance().build(RouteConst.PATH_MODULE2_B_SERVICE).navigation();
         service.showDefault();
+        Log.w("kakin", "module2BService cost " + (System.currentTimeMillis() - preTime) + "ms");
     }
 
+    public void reflectModule2BService(View view) {
+        String className = "com.kakin.module2.serviceprovider.Module2BServiceImpl";
+        try {
+            Debug.startMethodTracing("KRouter_init_2");
+            long preTime = System.currentTimeMillis();
+            Class clazz = Class.forName(className).getDeclaringClass();
+            if (clazz != null) {
+                Object object = clazz.getConstructor().newInstance();
+                Method method = clazz.getDeclaredMethod("showDefault");
+                method.setAccessible(true);
+                method.invoke(object);
+            }
+            Log.w("kakin", "reflectModule2BService cost " + (System.currentTimeMillis() - preTime) + "ms");
+            Debug.stopMethodTracing();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void reflectModule2BService2(View view) {
+        String className = "com.kakin.module2.serviceprovider.Module2BServiceImpl";
+        try {
+            Debug.startMethodTracing("KRouter_init_3");
+            long preTime = System.currentTimeMillis();
+            Class clazz = Class.forName(className).getDeclaringClass();
+            if (clazz != null) {
+                Module2BService service = (Module2BService) clazz.getConstructor().newInstance();
+                service.showDefault();
+            }
+            Log.w("kakin", "reflectModule2BService2 cost " + (System.currentTimeMillis() - preTime) + "ms");
+            Debug.stopMethodTracing();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

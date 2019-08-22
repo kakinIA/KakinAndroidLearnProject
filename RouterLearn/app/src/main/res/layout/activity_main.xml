@@ -36,5 +36,15 @@
         android:onClick="module2BService"
         android:text="module2BService" />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="reflectModule2BService"
+        android:text="reflectModule2BService" />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="reflectModule2BService2"
+        android:text="reflectModule2BService2" />
 </LinearLayout>
