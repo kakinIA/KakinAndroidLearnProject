@@ -1,6 +1,7 @@
 package com.kakin.learn.plugin_lib.proxy
 
 import android.app.Activity
+import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
@@ -95,5 +96,21 @@ open class ProxyPluginActivity : Activity() {
 
     override fun getResources(): Resources {
         return mPluginInfo?.resources ?: super.getResources()
+    }
+
+    override fun startActivity(intent: Intent?) {
+        val className = intent?.getStringExtra(PluginConst.CLASS_NAME)
+        val fileName = intent?.getStringExtra(PluginConst.PLUGIN_FILE_NAME)
+        if (className.isNullOrEmpty() || fileName.isNullOrEmpty()) {
+            super.startActivity(intent)
+        } else {
+            Intent(this, this.javaClass).apply {
+                intent.extras?.let {
+                    putExtras(it)
+                }
+            }.also {
+                super.startActivity(it)
+            }
+        }
     }
 }

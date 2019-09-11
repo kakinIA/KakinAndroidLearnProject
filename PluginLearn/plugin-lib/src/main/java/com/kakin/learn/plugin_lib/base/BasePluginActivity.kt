@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import com.kakin.learn.plugin_lib.PluginConst
 import com.kakin.learn.plugin_lib.standard.IPluginActivity
 
 /**
@@ -51,7 +52,13 @@ open class BasePluginActivity : Activity(), IPluginActivity {
 
     override fun startActivity(intent: Intent?) {
         if (mProxyActivity != null) {
-            mProxyActivity?.startActivity(intent)
+            //不可直接调用intent，因为宿主apk里没有注册该activity
+            Intent().apply {
+                putExtra(PluginConst.CLASS_NAME, intent?.component?.className)
+                putExtra(PluginConst.PLUGIN_FILE_NAME, "plugin-a.apk")
+            }.also {
+                mProxyActivity?.startActivity(it)
+            }
         } else {
             super.startActivity(intent)
         }

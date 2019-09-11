@@ -5,24 +5,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorAccent"
-        tools:context=".MainActivity">
-
+        tools:context=".OtherActivity">
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="i am plugin a!"
+            android:text="i am plugin a!\n Other Activity"
             android:textColor="#ffffff"
             android:textSize="27sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-            android:id="@+id/btn_goto_other_activity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="跳转到另外一个Activity"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
