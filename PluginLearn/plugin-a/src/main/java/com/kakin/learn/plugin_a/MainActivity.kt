@@ -14,6 +14,18 @@ class MainActivity : BasePluginActivity() {
         findViewById<View>(R.id.btn_goto_other_activity).setOnClickListener {
             gotoOtherActivity()
         }
+
+        findViewById<View>(R.id.btn_test_class).setOnClickListener {
+            PluginAClass().run {
+                toast(proxyActivity ?: this@MainActivity)
+            }
+        }
+
+        findViewById<View>(R.id.btn_start_service).setOnClickListener {
+            Intent(proxyActivity?: this, PluginAService::class.java).also {
+                startService(it)
+            }
+        }
     }
 
     /**
@@ -22,7 +34,7 @@ class MainActivity : BasePluginActivity() {
      * Could not find method gotoOtherActivity(View) in a parent or ancestor Context for android:onClick attribute defined on view class android.widget.Button
      */
     private fun gotoOtherActivity() {
-        Intent(mProxyActivity ?: this, OtherActivity::class.java).also {
+        Intent(proxyActivity ?: this, OtherActivity::class.java).also {
             startActivity(it)
         }
     }

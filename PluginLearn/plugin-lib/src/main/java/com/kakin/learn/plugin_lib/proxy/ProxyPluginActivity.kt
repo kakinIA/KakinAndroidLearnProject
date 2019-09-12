@@ -1,6 +1,7 @@
 package com.kakin.learn.plugin_lib.proxy
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
@@ -17,9 +18,9 @@ import com.kakin.learn.plugin_lib.standard.IPluginActivity
  */
 open class ProxyPluginActivity : Activity() {
 
-    private var mActivityClassName: String? = null
-    private var mPluginInfo: PluginInfo? = null
-    private var mTargetActivity: IPluginActivity? = null
+    protected var mActivityClassName: String? = null
+    protected var mPluginInfo: PluginInfo? = null
+    protected var mTargetActivity: IPluginActivity? = null
 
     companion object {
         private const val TAG = "ProxyPluginActivity"

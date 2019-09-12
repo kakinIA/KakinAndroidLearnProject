@@ -19,6 +19,21 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+            android:id="@+id/btn_start_service"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="开启插件A的服务"
+            app:layout_constraintBottom_toTopOf="@id/btn_test_class" />
+
+    <Button
+            android:id="@+id/btn_test_class"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试插件A中的类的使用"
+            app:layout_constraintBottom_toTopOf="@id/btn_goto_other_activity" />
+
+
+    <Button
             android:id="@+id/btn_goto_other_activity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
