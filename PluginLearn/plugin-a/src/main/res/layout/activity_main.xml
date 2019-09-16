@@ -19,6 +19,20 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+            android:id="@+id/btn_register_receiver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="注册插件A的广播接收者"
+            app:layout_constraintBottom_toTopOf="@id/btn_send_broadcast" />
+
+    <Button
+            android:id="@+id/btn_send_broadcast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="发送插件A的广播"
+            app:layout_constraintBottom_toTopOf="@id/btn_start_service" />
+
+    <Button
             android:id="@+id/btn_start_service"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

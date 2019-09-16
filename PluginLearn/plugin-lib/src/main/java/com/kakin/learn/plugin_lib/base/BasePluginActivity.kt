@@ -16,49 +16,49 @@ import com.kakin.learn.plugin_lib.standard.IPluginActivity
  */
 open class BasePluginActivity : Activity(), IPluginActivity {
 
-    protected var proxyActivity: Activity? = null
+    protected var mProxyActivity: Activity? = null
 
     override fun attach(proxyActivity: Activity) {
-        this.proxyActivity = proxyActivity
+        this.mProxyActivity = proxyActivity
     }
 
     override fun setContentView(layoutResID: Int) {
-        if (proxyActivity != null) {
-            proxyActivity?.setContentView(layoutResID)
+        if (mProxyActivity != null) {
+            mProxyActivity?.setContentView(layoutResID)
         } else {
             super.setContentView(layoutResID)
         }
     }
 
     override fun setContentView(view: View?) {
-        if (proxyActivity != null) {
-            proxyActivity?.setContentView(view)
+        if (mProxyActivity != null) {
+            mProxyActivity?.setContentView(view)
         } else {
             super.setContentView(view)
         }
     }
 
     override fun <T : View?> findViewById(id: Int): T {
-        val result = proxyActivity?.findViewById<T>(id)
+        val result = mProxyActivity?.findViewById<T>(id)
         return result ?: super.findViewById<T>(id)
     }
 
     override fun getIntent(): Intent {
-        return proxyActivity?.intent ?: super.getIntent()
+        return mProxyActivity?.intent ?: super.getIntent()
     }
 
     override fun getClassLoader(): ClassLoader {
-        return proxyActivity?.classLoader ?: super.getClassLoader()
+        return mProxyActivity?.classLoader ?: super.getClassLoader()
     }
 
     override fun startActivity(intent: Intent?) {
-        if (proxyActivity != null) {
+        if (mProxyActivity != null) {
             //不可直接调用intent，因为宿主apk里没有注册该activity
             Intent().apply {
                 putExtra(PluginConst.CLASS_NAME, intent?.component?.className)
                 putExtra(PluginConst.PLUGIN_FILE_NAME, "plugin-a.apk")
             }.also {
-                proxyActivity?.startActivity(it)
+                mProxyActivity?.startActivity(it)
             }
         } else {
             super.startActivity(intent)
@@ -66,69 +66,69 @@ open class BasePluginActivity : Activity(), IPluginActivity {
     }
 
     override fun startService(service: Intent?): ComponentName? {
-        if (proxyActivity != null) {
+        if (mProxyActivity != null) {
             Intent().apply {
                 putExtra(PluginConst.CLASS_NAME, service?.component?.className)
                 putExtra(PluginConst.PLUGIN_FILE_NAME, "plugin-a.apk")
             }.also {
-                return proxyActivity?.startService(it)
+                return mProxyActivity?.startService(it)
             }
         }
         return super.startService(service)
     }
 
     override fun getWindow(): Window {
-        return proxyActivity?.window ?: super.getWindow()
+        return mProxyActivity?.window ?: super.getWindow()
     }
 
     override fun getWindowManager(): WindowManager {
-        return proxyActivity?.windowManager ?: super.getWindowManager()
+        return mProxyActivity?.windowManager ?: super.getWindowManager()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (proxyActivity == null) {
+        if (mProxyActivity == null) {
             super.onCreate(savedInstanceState)
         }
     }
 
     override fun onStart() {
-        if (proxyActivity == null) {
+        if (mProxyActivity == null) {
             super.onStart()
         }
     }
 
     override fun onResume() {
-        if (proxyActivity == null) {
+        if (mProxyActivity == null) {
             super.onResume()
         }
     }
 
     override fun onPause() {
-        if (proxyActivity == null) {
+        if (mProxyActivity == null) {
             super.onPause()
         }
     }
 
     override fun onStop() {
-        if (proxyActivity == null) {
+        if (mProxyActivity == null) {
             super.onStop()
         }
     }
 
     override fun onDestroy() {
-        if (proxyActivity == null) {
+        if (mProxyActivity == null) {
             super.onDestroy()
         }
     }
 
     override fun onBackPressed() {
-        if (proxyActivity == null) {
+        if (mProxyActivity == null) {
             super.onBackPressed()
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
-        if (proxyActivity == null) {
+        if (mProxyActivity == null) {
             super.onSaveInstanceState(outState)
         }
     }

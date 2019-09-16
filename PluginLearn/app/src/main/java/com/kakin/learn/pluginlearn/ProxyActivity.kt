@@ -2,6 +2,8 @@ package com.kakin.learn.pluginlearn
 
 import android.content.ComponentName
 import android.content.Intent
+import android.content.IntentFilter
+import android.util.Log
 import com.kakin.learn.plugin_lib.PluginConst
 import com.kakin.learn.plugin_lib.proxy.ProxyPluginActivity
 
@@ -24,5 +26,13 @@ class ProxyActivity: ProxyPluginActivity() {
             }
         }
         return super.startService(service)
+    }
+
+    /**
+     * 因为要加上类名和插件文件名的设计，所以直接写一个新的注册接收者的方法
+     */
+    fun registerReceiver(receiverClassName: String, pluginFileName: String, filter: IntentFilter?) {
+        Log.w("kakin", "here is ProxyActivity#registerReceiver")
+        registerReceiver(ProxyBroadcastReceiver(receiverClassName, pluginFileName), filter)
     }
 }
