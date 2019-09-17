@@ -31,7 +31,6 @@ class MainActivity : BasePluginActivity() {
 
         findViewById<View>(R.id.btn_register_receiver).setOnClickListener {
             mProxyActivity?.registerReceiver(PluginABroadcastReceiver::class.java.name,"plugin-a.apk", IntentFilter().apply {
-                this.getCategory()
                 addAction(PluginABroadcastReceiver.ACTION)
             })
         }

@@ -1,6 +1,10 @@
 package com.kakin.learn.plugin_lib
 
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.util.Log
@@ -66,6 +70,46 @@ class PluginManager private constructor() {
             )
             mPluginInfoMap[pluginFileName] =
                 PluginInfo(context, pluginFileName, dexClassLoader, resources, pluginPath)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        parseReceivers(context, pluginPath, dexClassLoader)
+    }
+
+    @SuppressLint("PrivateApi")
+    private fun parseReceivers(context: Context, path: String?, dexClassLoader: DexClassLoader) {
+        try {
+            //6.0
+            val packageParserClazz = Class.forName("android.content.pm.PackageParser")
+            val parsePackageMethod = packageParserClazz.getDeclaredMethod(
+                "parsePackage",
+                File::class.java,
+                Int::class.java
+            )
+            val packageParserObj = packageParserClazz.newInstance()
+            val packageObj = parsePackageMethod.invoke(
+                packageParserObj,
+                File(path),
+                PackageManager.GET_RECEIVERS
+            )
+            val receiversField = packageObj.javaClass.getDeclaredField("receivers")
+            val receivers = receiversField.get(packageObj) as? List<Any>
+
+            val componentClazz = Class.forName("android.content.pm.PackageParser\$Component")
+            val intentsField = componentClazz.getDeclaredField("intents")
+            val classNameField = componentClazz.getDeclaredField("className")
+
+            receivers?.forEach {
+                val className = classNameField.get(it) as? String
+                val receiver =
+                    dexClassLoader.loadClass(className).newInstance() as? BroadcastReceiver
+                val intents = intentsField.get(it) as? List<out IntentFilter>
+                intents?.forEach { intentFilter ->
+                    context.registerReceiver(receiver, intentFilter)
+                }
+            }
+
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -18,6 +18,11 @@
             </intent-filter>
         </activity>
         <service android:name=".PluginAService"/>
+        <receiver android:name=".PluginABroadcastReceiver">
+            <intent-filter>
+                <action android:name="com.kakin.learn.plugin_a.PluginABroadcastReceiver"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
