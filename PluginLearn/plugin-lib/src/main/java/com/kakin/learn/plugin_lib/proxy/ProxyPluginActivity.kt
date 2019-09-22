@@ -29,7 +29,9 @@ open class ProxyPluginActivity : Activity() {
         super.onCreate(savedInstanceState)
         mActivityClassName = intent.getStringExtra(PluginConst.CLASS_NAME)
         val pluginFileName = intent.getStringExtra(PluginConst.PLUGIN_FILE_NAME)
-        mPluginInfo = PluginManager.instance.getPluginInfo(pluginFileName)
+        pluginFileName?.let {
+            mPluginInfo = PluginManager.instance.getPluginInfo(pluginFileName)
+        }
         if (mPluginInfo != null) {
             initTargetActivity(mActivityClassName)
             mTargetActivity?.onCreate(savedInstanceState)

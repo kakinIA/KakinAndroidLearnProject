@@ -1,9 +1,10 @@
 package com.kakin.learn.pluginlearn
 
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import android.support.v7.app.AppCompatActivity
 import com.kakin.learn.plugin_lib.PluginConst
 import com.kakin.learn.plugin_lib.PluginManager
 
@@ -30,4 +31,15 @@ class MainActivity : AppCompatActivity() {
             startActivity(it)
         }
     }
+
+    fun gotoPluginB(view: View) {
+        Intent(this, ProxyActivity::class.java).apply {
+            component =
+                ComponentName("com.kakin.learn.plugin_b", "com.kakin.learn.plugin_b.MainActivity")
+//            ComponentName("com.kakin.learn.pluginlearn", "com.kakin.learn.pluginlearn.MyActivity")
+        }.also {
+            startActivity(it)
+        }
+    }
+
 }

@@ -38,9 +38,9 @@ open class BasePluginActivity : Activity(), IPluginActivity {
         }
     }
 
-    override fun <T : View?> findViewById(id: Int): T {
-        val result = mProxyActivity?.findViewById<T>(id)
-        return result ?: super.findViewById<T>(id)
+    override fun findViewById(id: Int): View {
+        val result = mProxyActivity?.findViewById(id)
+        return result ?: super.findViewById(id)
     }
 
     override fun getIntent(): Intent {

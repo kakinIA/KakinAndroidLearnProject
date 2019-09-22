@@ -7,16 +7,22 @@
         android:orientation="vertical"
         tools:context=".MainActivity">
 
-   <Button
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:text="加载插件A"
-           android:onClick="loadPluginA"/>
+    <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="loadPluginA"
+            android:text="加载插件A" />
 
     <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="跳到插件A主页"
-            android:onClick="gotoPluginA"/>
+            android:onClick="gotoPluginA"
+            android:text="跳到插件A主页（插桩方法）" />
+
+    <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="gotoPluginB"
+            android:text="跳转到插件B主要（hook方法）" />
 
 </LinearLayout>

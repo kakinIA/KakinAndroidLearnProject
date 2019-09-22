@@ -7,4 +7,6 @@ package com.kakin.learn.plugin_lib
 object PluginConst {
     const val CLASS_NAME = "class_name"
     const val PLUGIN_FILE_NAME = "plugin_file_name"
+
+    const val REAL_INTENT = "real_intent"
 }
