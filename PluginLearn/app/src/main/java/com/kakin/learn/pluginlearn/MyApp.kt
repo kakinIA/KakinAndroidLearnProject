@@ -30,7 +30,8 @@ class MyApp : Application() {
         val pluginFileDir = getDir("plugin", Context.MODE_PRIVATE)
         val pluginFile = File(pluginFileDir, "plugin-b.apk")
         val pluginPath = pluginFile.absolutePath
-        PluginManager.instance.injectPluginClassAndResource(this, "plugin-b.apk")
+//        PluginManager.instance.injectPluginClass(this, "plugin-b.apk")
+        PluginManager.instance.injectLoadedApk(this, pluginPath)
         injectResources(pluginPath)
     }
 

@@ -2,14 +2,19 @@ package com.kakin.learn.plugin_lib
 
 import android.annotation.SuppressLint
 import android.content.*
+import android.content.pm.ActivityInfo
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.os.Handler
 import android.os.Message
+import android.util.ArrayMap
 import android.util.Log
 import dalvik.system.DexClassLoader
 import java.io.*
+import java.lang.ref.WeakReference
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
@@ -82,7 +87,7 @@ class PluginManager private constructor() {
         parseReceivers(context, pluginPath, dexClassLoader)
     }
 
-    fun injectPluginClassAndResource(
+    fun injectPluginClass(
         context: Context,
         pluginFileName: String,
         isRefresh: Boolean = true
@@ -110,13 +115,15 @@ class PluginManager private constructor() {
         try {
             //获取插件的dexElements
             val pluginBaseDexClassLoaderClazz = Class.forName("dalvik.system.BaseDexClassLoader")
-            val pluginPathListField = pluginBaseDexClassLoaderClazz.getDeclaredField("pathList").apply {
-                isAccessible = true
-            }
+            val pluginPathListField =
+                pluginBaseDexClassLoaderClazz.getDeclaredField("pathList").apply {
+                    isAccessible = true
+                }
 
             val pluginDexPathList = pluginPathListField.get(dexClassLoader)
-            val pluginDexElementsField = pluginDexPathList::class.java.getDeclaredField("dexElements")
-                .apply { isAccessible = true }
+            val pluginDexElementsField =
+                pluginDexPathList::class.java.getDeclaredField("dexElements")
+                    .apply { isAccessible = true }
             val pluginDexElements = pluginDexElementsField.get(pluginDexPathList)
 
 
@@ -143,12 +150,74 @@ class PluginManager private constructor() {
                 if (i < pluginDexElementsLength) {
                     Array.set(newDexElements, i, Array.get(pluginDexElements, i))
                 } else {
-                    Array.set(newDexElements, i, Array.get(myDexElements, i - pluginDexElementsLength))
+                    Array.set(
+                        newDexElements,
+                        i,
+                        Array.get(myDexElements, i - pluginDexElementsLength)
+                    )
                 }
             }
 
             myDexElementsField.set(myDexPathList, newDexElements)
 
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    @SuppressLint("PrivateApi")
+    fun injectLoadedApk(context: Context, path: String) {
+        try {
+            val activityThreadClazz = Class.forName("android.app.ActivityThread")
+            val currentActivityThreadField = activityThreadClazz
+                .getDeclaredField("sCurrentActivityThread").apply {
+                    isAccessible = true
+                }
+            val sCurrentActivityThread = currentActivityThreadField.get(null)
+            val mPackagesField = activityThreadClazz.getDeclaredField("mPackages")
+                .apply { isAccessible = true }
+            val mPackages =
+                mPackagesField.get(sCurrentActivityThread) as ArrayMap<String, WeakReference<*>>
+
+            //找到  getPackageInfoNoCheck   method 方法
+            val compatibilityInfoClass = Class.forName("android.content.res.CompatibilityInfo")
+            val getPackageInfoNoCheckMethod = activityThreadClazz.getDeclaredMethod(
+                "getPackageInfoNoCheck", ApplicationInfo::class.java, compatibilityInfoClass
+            )
+
+            //得到 CompatibilityInfo  里面的  静态成员变量       DEFAULT_COMPATIBILITY_INFO  类型  CompatibilityInfo
+            val defaultCompatibilityInfoField =
+                compatibilityInfoClass.getDeclaredField("DEFAULT_COMPATIBILITY_INFO")
+            val defaultCompatibilityInfo = defaultCompatibilityInfoField.get(null)
+
+            val applicationInfo = generateApplicationInfo(context, path)
+
+            //一个问题  传参 ApplicationInfo ai 一定是与插件相关    ApplicationInfo----》插件apk文件
+            //LoadedApk getPackageInfoNoCheck(ApplicationInfo ai, CompatibilityInfo compatInfo)
+            val loadedApk = getPackageInfoNoCheckMethod.invoke(
+                sCurrentActivityThread,
+                applicationInfo,
+                defaultCompatibilityInfo
+            )
+
+
+            val odexPath = context.getDir("odex", Context.MODE_PRIVATE)
+
+            val libDir = context.getDir("lib_dir", Context.MODE_PRIVATE)
+
+            val classLoader = CustomClassLoader(
+                path,
+                odexPath.absolutePath,
+                libDir.absolutePath,
+                context.classLoader
+            )
+            val mClassLoaderField = loadedApk.javaClass.getDeclaredField("mClassLoader")
+            mClassLoaderField.isAccessible = true
+            mClassLoaderField.set(loadedApk, classLoader)
+            val weakReference = WeakReference(loadedApk)
+
+            //最终目的  是替换ClassLoader  不是替换LoaderApk
+            mPackages[applicationInfo?.packageName] = weakReference
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -165,7 +234,8 @@ class PluginManager private constructor() {
             val sCurrentActivityThread = currentActivityThreadField.get(null)
             val mHField = activityThreadClazz.getDeclaredField("mH").apply { isAccessible = true }
             val mH = mHField.get(sCurrentActivityThread) as Handler
-            val callbackField = Handler::class.java.getDeclaredField("mCallback").apply { isAccessible = true }
+            val callbackField =
+                Handler::class.java.getDeclaredField("mCallback").apply { isAccessible = true }
             callbackField.set(mH, HookMainHandlerCallback(mH))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -235,6 +305,55 @@ class PluginManager private constructor() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    @SuppressLint("PrivateApi")
+    private fun generateApplicationInfo(context: Context, path: String): ApplicationInfo? {
+
+        //        Package对象
+        //        PackageParser pp = new PackageParser();
+        //        PackageParser.Package  pkg = pp.parsePackage(scanFile, parseFlags);
+        try {
+
+            val packageParserClazz = Class.forName("android.content.pm.PackageParser")
+            val parsePackageMethod = packageParserClazz.getDeclaredMethod(
+                "parsePackage",
+                File::class.java,
+                Int::class.javaPrimitiveType
+            )
+            val packageParser = packageParserClazz.newInstance()
+            val packageObj =
+                parsePackageMethod.invoke(packageParser, File(path), PackageManager.GET_ACTIVITIES)
+
+            //            generateActivityInfo方法
+            val packageUserStateClass = Class.forName("android.content.pm.PackageUserState")
+            val defaultUserState = packageUserStateClass.newInstance()
+            //目的     generateApplicationInfo  方法  生成  ApplicationInfo
+            // 需要调用 android.content.pm.PackageParser#generateActivityInfo(android.content.pm.ActivityInfo, int, android.content.pm.PackageUserState, int)
+            //      generateApplicationInfo
+            val generateApplicationInfoMethod = packageParserClazz.getDeclaredMethod(
+                "generateApplicationInfo",
+                packageObj.javaClass,
+                Int::class.javaPrimitiveType,
+                packageUserStateClass
+            )
+            val applicationInfo = generateApplicationInfoMethod.invoke(
+                packageParser,
+                packageObj,
+                0,
+                defaultUserState
+            ) as ApplicationInfo
+
+            applicationInfo.sourceDir = path
+            applicationInfo.publicSourceDir = path
+            return applicationInfo
+            //generateActivityInfo
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return null
+
     }
 
     /**
@@ -331,7 +450,18 @@ class PluginManager private constructor() {
                     val realIntent =
                         intent.getParcelableExtra<Intent?>(PluginConst.REAL_INTENT)
                     realIntent?.let {
+                        //这个情况下证明跳转的是插件activity
                         intentField.set(msg.obj, it)
+
+                        //hook activityInfo
+                        val activityInfoField = obj.javaClass.getDeclaredField("activityInfo")
+                            .apply { isAccessible = true }
+                        val activityInfo = activityInfoField.get(obj) as? ActivityInfo
+                        //替换application包名，并且还需要hook IPackageManager#getPackageInfo
+                        activityInfo?.applicationInfo?.packageName =
+                            realIntent.`package` ?: realIntent.component?.packageName
+
+//                        hookPackageManager() //sdk23好像不用也可以
                     }
                 }
             } catch (e: Exception) {
@@ -339,5 +469,44 @@ class PluginManager private constructor() {
             }
         }
 
+        /**
+         * 欺骗PMS中的包名检查检查,系统在调用ActivityThread#performLaunchActivity时会再次检查包名是否已安装
+         */
+        @SuppressLint("PrivateApi")
+        private fun hookPackageManager() {
+
+            try {
+                val activityThreadClazz = Class.forName("android.app.ActivityThread")
+                val currentActivityThreadMethod =
+                    activityThreadClazz.getDeclaredMethod("currentActivityThread")
+                        .apply { isAccessible = true }
+                val currentActivityThread = currentActivityThreadMethod.invoke(null)
+
+                //获取sPackageManager
+                val sPackageManagerField = activityThreadClazz.getDeclaredField("sPackageManager")
+                    .apply { isAccessible = true }
+                val sPackageManager = sPackageManagerField.get(currentActivityThread)
+
+                val iPackageManagerClazz = Class.forName("android.content.pm.IPackageManager")
+                val proxyPackageManager = Proxy.newProxyInstance(
+                    iPackageManagerClazz.classLoader, arrayOf(iPackageManagerClazz)
+                ) { _, method, args ->
+                    if (method.name == "getPackageInfo") {
+                        PackageInfo()
+                    } else {
+                        method?.invoke(sPackageManager, args)
+                    }
+                }
+                sPackageManagerField.set(currentActivityThread, proxyPackageManager)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
     }
+
+    class CustomClassLoader(
+        dexPath: String, optimizedDirectory: String,
+        libraryPath: String, parent: ClassLoader
+    ) : DexClassLoader(dexPath, optimizedDirectory, libraryPath, parent)
 }
