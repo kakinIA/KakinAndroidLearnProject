@@ -319,6 +319,9 @@ PackageParser的作用不但可以解析apk成javaBean的形式，而且还提�
 
 >>可参考PluginManager#injectLoadedApk
 
+SDK23_StartActivity流程时相关序图 
+
+![image](https://github.com/kakinIA/KakinAndroidLearnProject-Lib/blob/master/PluginLearn/note/SDK23_StartActivity%E6%B5%81%E7%A8%8B%E6%97%B6%E5%BA%8F%E5%9B%BE.png)
 
 ### 待调研
 * 版本兼容，特别是sdk28以上hide api限制
