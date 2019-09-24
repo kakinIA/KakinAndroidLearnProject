@@ -31,7 +31,7 @@ class MyApp : Application() {
         val pluginFile = File(pluginFileDir, "plugin-b.apk")
         val pluginPath = pluginFile.absolutePath
 //        PluginManager.instance.injectPluginClass(this, "plugin-b.apk")
-        PluginManager.instance.injectLoadedApk(this, pluginPath)
+        PluginManager.instance.injectLoadedApk(this, "plugin-b.apk")
         injectResources(pluginPath)
     }
 

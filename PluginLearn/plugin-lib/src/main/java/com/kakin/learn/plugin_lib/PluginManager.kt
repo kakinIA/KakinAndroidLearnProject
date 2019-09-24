@@ -166,8 +166,29 @@ class PluginManager private constructor() {
     }
 
     @SuppressLint("PrivateApi")
-    fun injectLoadedApk(context: Context, path: String) {
+    fun injectLoadedApk(
+        context: Context,
+        pluginFileName: String,
+        isRefresh: Boolean = true
+    ) {
         try {
+            val filesDir = context.getDir(FOLDER_NAME_PLUGIN, Context.MODE_PRIVATE)
+            val pluginFile = File(filesDir, pluginFileName)
+            val pluginPath = pluginFile.absolutePath
+
+            if (isRefresh) {
+                //先删除，做更新
+                if (pluginFile.exists()) {
+                    pluginFile.delete()
+                }
+                obtainPluginFile(context, pluginFileName, pluginFile)
+            } else {
+                if (!pluginFile.exists()) {
+                    obtainPluginFile(context, pluginFileName, pluginFile)
+                }
+            }
+
+
             val activityThreadClazz = Class.forName("android.app.ActivityThread")
             val currentActivityThreadField = activityThreadClazz
                 .getDeclaredField("sCurrentActivityThread").apply {
@@ -190,7 +211,7 @@ class PluginManager private constructor() {
                 compatibilityInfoClass.getDeclaredField("DEFAULT_COMPATIBILITY_INFO")
             val defaultCompatibilityInfo = defaultCompatibilityInfoField.get(null)
 
-            val applicationInfo = generateApplicationInfo(context, path)
+            val applicationInfo = generateApplicationInfo(context, pluginPath)
 
             //一个问题  传参 ApplicationInfo ai 一定是与插件相关    ApplicationInfo----》插件apk文件
             //LoadedApk getPackageInfoNoCheck(ApplicationInfo ai, CompatibilityInfo compatInfo)
@@ -206,7 +227,7 @@ class PluginManager private constructor() {
             val libDir = context.getDir("lib_dir", Context.MODE_PRIVATE)
 
             val classLoader = CustomClassLoader(
-                path,
+                pluginPath,
                 odexPath.absolutePath,
                 libDir.absolutePath,
                 context.classLoader

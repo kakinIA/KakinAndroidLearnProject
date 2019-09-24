@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">plugin-b</string>
+    <string name="welcome_to_plugin_b">welcome to plugin-b</string>
 </resources>
